@@ -2,23 +2,35 @@ name: Sync Folder from oddsource-repo to oddtarget-repo
 
 on:
   push:
-    paths:
-      - 'odd-folder-sync/**'
+    branches:
+      - main
 
 jobs:
   sync:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout source repository
-        uses: actions/checkout@v3
+      - name: Checkout oddtarget-repo (repo2)
+        uses: actions/checkout@v2
+        with:
+          repository: kotaRaghav/oddtarget-repo
+          ref: main
+          token: ${{ secrets.REPO2_TOKEN }}
 
-      - name: Copy folder to target repo
+      - name: Checkout oddsource-repo (repo1)
+        uses: actions/checkout@v2
+        with:
+          repository: kotaRaghav/oddsource-repo
+          ref: main
+          token: ${{ secrets.REPO1_TOKEN }}
+
+      - name: Copy files from oddsource-repo to oddtarget-repo
         run: |
-          git clone https://kotaRaghav:${{ secrets.ODDTARGET_TOKEN }}@github.com/kotaRaghav/oddtarget-repo.git
-          cp -r odd-folder-sync/* oddtarget-repo/
-          cd oddtarget-repo
-          git config user.name "kotaRaghav"
-          git config user.email "raghavendraasdf@mail.com"
+          cp -r oddsource-repo/odd-folder-sync/* oddtarget-repo/sync-folder/
+
+      - name: Commit and push changes to oddtarget-repo
+        run: |
+          git config --global user.name "kotaRaghav"
+          git config --global user.email "your-email@example.com"
           git add .
-          git commit -m "Sync odd-folder-sync from oddsource-repo"
-          git push
+          git commit -m "Sync files from oddsource-repo"
+          git push origin main
